@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction
+from PyQt4.QtGui import QAction, QIcon
 from qgis.core import QgsMapLayerRegistry, QgsTransaction
 # Initialize Qt resources from file resources.py
 import resources
@@ -54,16 +54,14 @@ class UnifiedEdit:
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+            QCoreApplication.installTranslator(self.translator)
 
         self.toolbar = self.iface.digitizeToolBar()
 
-        self.toggleEditSession = QAction('Start Transaction', self.toolbar)
+        self.toggleEditSession = QAction(QIcon(':/edit.svg'), 'Start Transaction', self.toolbar)
         self.toggleEditSession.toggled.connect(self.toggleEditSessionToggled)
 
-        self.transaction=None
+        self.transaction = None
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -74,6 +72,11 @@ class UnifiedEdit:
 
     def toggleEditSessionToggled(self, checked):
         if checked:
+            self.beginTransaction()
+        else:
+            self.commitChanges()
+
+    def beginTransaction(self):
             layers = list()
             for l in QgsMapLayerRegistry.instance().mapLayers().keys():
                 if not self.transaction:
@@ -84,16 +87,23 @@ class UnifiedEdit:
                     if self.transaction.addLayer(l):
                         layers.append(l)
 
-            self.transaction.begin()
+            if self.transaction:
+                self.transaction.begin()
 
-            for l in layers:
-                QgsMapLayerRegistry.instance().mapLayer(l).startEditing()
-        else:
-            for l in  QgsMapLayerRegistry.instance().mapLayers().values():
-                l.commitChanges()
-            self.transaction.commit()
+                for l in layers:
+                    QgsMapLayerRegistry.instance().mapLayer(l).startEditing()
 
+                self.toggleEditSession.setIcon(QIcon(':commit-end.svg'))
 
+    def commitChanges(self):
+        for l in  QgsMapLayerRegistry.instance().mapLayers().values():
+            l.commitChanges()
+
+        self.transaction.commit()
+        self.toggleEditSession.setIcon(QIcon(':edit.svg'))
+
+    def rollbak(self):
+        self.transaction.rollBack()
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

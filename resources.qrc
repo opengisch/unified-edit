@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/plugins/UnifiedEdit" >
-        <file>icon.png</file>
+    <qresource>
+        <file alias="edit.svg">res/edit.svg</file>
+        <file alias="commit-end.svg">res/commit-end.svg</file>
     </qresource>
 </RCC>

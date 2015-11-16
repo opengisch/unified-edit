@@ -38,15 +38,15 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	unified_edit.py unified_edit_dialog.py
+	unified_edit.py
 
 PLUGINNAME = UnifiedEdit
 
 PY_FILES = \
 	__init__.py \
-	unified_edit.py unified_edit_dialog.py
+	unified_edit.py
 
-UI_FILES = unified_edit_dialog_base.ui
+UI_FILES =
 
 EXTRAS = metadata.txt icon.png
 

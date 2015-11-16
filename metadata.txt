@@ -30,7 +30,7 @@ tags=transaction, layer, edit, unified, session
 
 homepage=https://www.opengis.ch
 category=Plugins
-icon=icon.png
+icon=res/edit.svg
 # experimental flag
 experimental=False
 
