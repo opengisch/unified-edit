@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
-from qgis.core import QgsMapLayerRegistry, QgsTransaction
+from qgis.core import QgsMapLayerRegistry, QgsTransaction, QgsMapLayer
 # Initialize Qt resources from file resources.py
 import resources
 import os.path
@@ -78,20 +78,22 @@ class UnifiedEdit:
 
     def beginTransaction(self):
             layers = list()
-            for l in QgsMapLayerRegistry.instance().mapLayers().keys():
+            for l in QgsMapLayerRegistry.instance().mapLayers().values():
+                if l.type() != QgsMapLayer.VectorLayer:
+                    continue
                 if not self.transaction:
-                    self.transaction = QgsTransaction.create([l])
+                    self.transaction = QgsTransaction.create([l.id()])
                     if self.transaction:
                         layers.append(l)
                 else:
-                    if self.transaction.addLayer(l):
+                    if self.transaction.addLayer(l.id()):
                         layers.append(l)
 
             if self.transaction:
                 self.transaction.begin()
 
                 for l in layers:
-                    QgsMapLayerRegistry.instance().mapLayer(l).startEditing()
+                    l.startEditing()
 
                 self.toggleEditSession.setIcon(QIcon(':commit-end.svg'))
 
